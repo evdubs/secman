@@ -1,0 +1,266 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>User</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/" style="color:white">Securities Management</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+          <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+            <li class="nav-item">
+              <a class="nav-link" href="/assets.html" style="color:white">Assets</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/categories.html" style="color:white">Categories</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/users.html" style="color:white">Users</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container my-3">
+      <h3>User</h3>
+    </div>
+    <div class="container my-3">
+      <div class="btn-group" role="group" aria-label="User Actions">
+        <button type="button" class="btn btn-primary" id="back-to-users-button">Back to Users</button>
+      </div>
+      <form class="my-3">
+        <div class="mb-3">
+          <label for="user-id-input" class="form-label">User Id</label>
+          <input type="text" class="form-control" id="user-id-input" required></input>
+        </div>
+      </form>
+      <div class="col-12">
+        <button type="button" class="btn btn-primary" id="load-button" disabled>Load User</button>
+      </div>
+    </div>
+    <div class="container my-3">
+      <hr/>
+      <h4>User Details</h4>
+    </div>
+    <div class="container my-3">
+      <form class="my-3">
+        <div class="mb-3">
+          <label for="user-name-input" class="form-label">User Name</label>
+          <input type="text" class="form-control" id="user-name-input" required></input>
+        </div>
+      </form>
+      <div class="row mb-2">
+        <div class="col">Id</div><div class="col-9" id="id-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Gaid</div><div class="col-9" id="gaid-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Company</div><div class="col-9" id="company-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Categories</div><div class="col-9" id="categories-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Creator</div><div class="col-9" id="creator-div"></div>
+      </div>
+    </div>
+    <div class="container my-3">
+      <hr/>
+      <h4>User Actions</h4>
+    </div>
+    <div class="container my-3">
+      <div class="btn-group" role="group" aria-label="User Actions">
+        <button type="button" class="btn btn-primary" id="edit-button">Edit</button>
+        <button type="button" class="btn btn-primary" id="delete-button" disabled>Delete</button>
+      </div>
+    </div>
+    <div class="container my-3">
+      <hr/>
+      <h4>User Summary</h4>
+    </div>
+    <div class="container my-3">
+      <table class="table" id="summary-table">
+        <thead>
+          <tr>
+            <th scope="col">Asset Name</th>
+            <th scope="col">Assignments Sum</th>
+            <th scope="col">Distributions Sum</th>
+            <th scope="col">Balance</th>
+          </tr>
+        </thead>
+      </table>
+      <h5 class="my-2">Assignments</h5>
+      <table class="table" id="assignment-table">
+        <thead>
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Asset Name</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Receiving Address</th>
+            <th scope="col">Distribution Uuid</th>
+            <th scope="col">Ready</th>
+            <th scope="col">Vesting</th>
+            <th scope="col">Vested</th>
+            <th scope="col">Distributed</th>
+            <th scope="col">Creator</th>
+          </tr>
+        </thead>
+      </table>
+      <h5 class="my-2">Distributions</h5>
+      <table class="table" id="distribution-table">
+        <thead>
+          <tr>
+            <th scope="col">Asset Name</th>
+            <th scope="col">Dist Uuid</th>
+            <th scope="col">Dist Status</th>
+            <th scope="col">Txid</th>
+            <th scope="col">Tx Status</th>
+            <th scope="col">Blockheight</th>
+            <th scope="col">Confirmed</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Vout</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </body>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function user() {
+      const userId = document.getElementById('user-id-input').value ? 
+        document.getElementById('user-id-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request(`/api/registered_users/${userId}`, {
+        method: "get",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      const user = await response.json()
+
+      document.getElementById('id-div').innerText = user['id']
+      document.getElementById('gaid-div').innerText = user['GAID']
+      document.getElementById('company-div').innerText = user['is_company']
+      document.getElementById('user-name-input').value = user['name']
+      document.getElementById('categories-div').innerHTML = user['categories'].
+        map(c => `<a href="/category.html?id=${c}">${window.localStorage.getItem(`category_id:${c}`)}</a>`).
+        join(', ')
+      document.getElementById('creator-div').innerText = user['creator']
+
+      document.getElementById('load-button').removeAttribute('disabled')
+    }
+
+    async function user_edit() {
+      const userId = document.getElementById('user-id-input').value ? 
+        document.getElementById('user-id-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request(`/api/registered_users/${userId}/edit`, {
+        method: "put",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` },
+        body: JSON.stringify({ 'name': document.getElementById('user-name-input').value })
+      }))
+
+      console.log((await response.json()))
+
+      await user()
+    }
+
+    async function user_delete() {
+      const userId = document.getElementById('user-id-input').value ? 
+        document.getElementById('user-id-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request(`/api/registered_users/${userId}/delete`, {
+        method: "delete",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      console.log((await response.json()))
+
+      window.open("/users.html", "_self") 
+    }
+
+    async function user_summary() {
+      const summaryTable = document.getElementById('summary-table')
+      for(i = 1; i < summaryTable.rows.length; i++) {
+        summaryTable.deleteRow(i)
+      }
+
+      const assignmentTable = document.getElementById('assignment-table')
+      for(i = 1; i < assignmentTable.rows.length; i++) {
+        assignmentTable.deleteRow(i)
+      }
+
+      const userId = document.getElementById('user-id-input').value ? 
+        document.getElementById('user-id-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const summary_response = await fetch(new Request(`/api/registered_users/${userId}/summary`, {
+        method: "get",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      const summaries = await summary_response.json()
+
+      for (const summary of summaries) {
+        const row = summaryTable.insertRow()
+        row.innerHTML = [
+          `<td><a href="/asset.html?uuid=${summary['asset_uuid']}">${window.localStorage.getItem(`asset_uuid:${summary['asset_uuid']}`)}</a></td>`,
+          `<td>${summary['assignments_sum']}</td>`,
+          `<td>${summary['distributions_sum']}</td>`,
+          `<td>${summary['balance']}</td>`,
+        ].join('')
+
+        for (const assignment of summary['assignments']) {
+          const rxaddr = assignment['receiving_address']
+          const dxuuid = assignment['distribution_uuid'] != null ? assignment['distribution_uuid'] : '        '
+
+          const row = assignmentTable.insertRow()
+          row.innerHTML = [
+            `<td>${assignment['id']}</td>`,
+            `<td><a href="/asset.html?uuid=${summary['asset_uuid']}">${window.localStorage.getItem(`asset_uuid:${summary['asset_uuid']}`)}</a></td>`,
+            `<td>${assignment['amount']}</td>`,
+            `<td data-bs-toggle="tooltip" data-bs-title="${rxaddr}">${rxaddr.substring(0, 4)} ... ${rxaddr.substring((rxaddr.length - 4), rxaddr.length)}</td>`,
+            `<td data-bs-toggle="tooltip" data-bs-title="${dxuuid}">${dxuuid.substring(0, 4)} ... ${dxuuid.substring((dxuuid.length - 4), dxuuid.length)}</td>`,
+            `<td>${assignment['ready_for_distribution']}</td>`,
+            `<td>${assignment['vesting_datetime']}</td>`,
+            `<td>${assignment['has_vested']}</td>`,
+            `<td>${assignment['is_distributed']}</td>`,
+            `<td>${assignment['creator']}</td>`
+          ].join('')
+        }
+      }
+
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    }
+
+    const params = new URLSearchParams(document.location.search)
+
+    document.getElementById('user-id-input').value = params.get("id")
+
+    document.getElementById('load-button').addEventListener('click', (event) => {
+      window.open(`/user.html?id=${document.getElementById('user-id-input').value}`, '_self')
+    })
+    document.getElementById('back-to-users-button').addEventListener('click', (event) => { 
+      window.open("/users.html", "_self")
+    })
+    document.getElementById('edit-button').addEventListener('click', (event) => { user_edit() })
+
+    user()
+
+    user_summary()
+  </script>
+</html>

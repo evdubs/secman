@@ -1,0 +1,336 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>Category</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/" style="color:white">Securities Management</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+          <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+            <li class="nav-item">
+              <a class="nav-link" href="/assets.html" style="color:white">Assets</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/categories.html" style="color:white">Categories</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/users.html" style="color:white">Users</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container my-3">
+      <h3>Category</h3>
+    </div>
+    <div class="container my-3">
+      <div class="btn-group" role="group" aria-label="Category Actions">
+        <button type="button" class="btn btn-primary" id="back-to-categories-button">Back to Categories</button>
+      </div>
+      <form class="my-3">
+        <div class="mb-3">
+          <label for="category-id-input" class="form-label">Category Id</label>
+          <input type="text" class="form-control" id="category-id-input" required></input>
+        </div>
+      </form>
+      <div class="col-12">
+        <button type="button" class="btn btn-primary" id="load-button" disabled>Load Category</button>
+      </div>
+    </div>
+    <div class="container my-3">
+      <hr/>
+      <h4>Category Details</h4>
+    </div>
+    <div class="container my-3">
+      <form class="my-3">
+        <div class="mb-3">
+          <label for="category-name-input" class="form-label">Category Name</label>
+          <input type="text" class="form-control" id="category-name-input" required></input>
+        </div>
+        <div class="mb-3">
+          <label for="description-input" class="form-label">Description</label>
+          <input type="text" class="form-control" id="description-input" required></input>
+        </div>
+      </form>
+      <div class="row mb-2">
+        <div class="col">Id</div><div class="col-9" id="id-div"></div>
+      </div>
+    </div>
+    <div class="container my-3">
+      <hr/>
+      <h4>Category Actions</h4>
+    </div>
+    <div class="container my-3">
+      <div class="btn-group" role="group" aria-label="Category Actions">
+        <button type="button" class="btn btn-primary" id="edit-button">Edit</button>
+        <button type="button" class="btn btn-primary" id="delete-button" disabled>Delete</button>
+      </div>
+    </div>
+    <div class="container my-3">
+      <hr/>
+      <h5 class="my-2">Registered Users</h5>
+      <form class="my-3">
+        <div class="mb-3">
+          <label for="user-input" class="form-label">User Name (Id)</label>
+          <input list="user-datalist" class="form-control" id="user-input"></input>
+          <datalist id="user-datalist"></datalist>
+        </div>
+        <div class="btn-group" role="group" aria-label="Category User Actions">
+          <button type="button" class="btn btn-primary" id="add-user-button">Add User to Category</button>
+          <button type="button" class="btn btn-primary" id="remove-user-button">Remove User from Category</button>
+        </div>
+      </form>
+      <table class="table" id="user-table">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Id</th>
+          </tr>
+        </thead>
+      </table>
+      <h5 class="my-2">Assets</h5>
+      <form class="my-3">
+        <div class="mb-3">
+          <label for="asset-input" class="form-label">Asset Name (Uuid)</label>
+          <input list="asset-datalist" class="form-control" id="asset-input"></input>
+          <datalist id="asset-datalist"></datalist>
+        </div>
+        <div class="btn-group" role="group" aria-label="Category Asset Actions">
+          <button type="button" class="btn btn-primary" id="add-asset-button">Add Asset to Category</button>
+          <button type="button" class="btn btn-primary" id="remove-asset-button">Remove Asset from Category</button>
+        </div>
+      </form>
+      <table class="table" id="asset-table">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Uuid</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </body>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function category() {
+      document.getElementById('load-button').setAttribute('disabled', 'true')
+
+      const categoryId = document.getElementById('category-id-input').value ? 
+        document.getElementById('category-id-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request(`/api/categories/${categoryId}`, {
+        method: "get",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      const category = await response.json()
+
+      document.getElementById('id-div').innerText = category['id']
+      document.getElementById('category-name-input').value = category['name']
+      document.getElementById('description-input').value = category['description']
+
+      const assetUuids = Array.from(Array(window.localStorage.length).keys()).
+        map(i => window.localStorage.key(i)).
+        filter(k => k.startsWith('asset_uuid:')).
+        map(id => id.replace('asset_uuid:', ''))
+
+      const assetDatalist = document.getElementById('asset-datalist')
+      assetDatalist.innerHTML = ''
+      for (const uuid of assetUuids) {
+        assetDatalist.innerHTML += `<option value="${window.localStorage.getItem(`asset_uuid:${uuid}`)} (${uuid})"/>`
+      }
+
+      const assetTable = document.getElementById('asset-table')
+      for(i = 1; i < assetTable.rows.length; i++) { assetTable.deleteRow(i) }
+      for (const asset of category['assets']) {
+        const row = assetTable.insertRow()
+        row.innerHTML = [
+          `<td><a href="/asset.html?uuid=${asset}">${window.localStorage.getItem(`asset_uuid:${asset}`)}</a></td>`,
+          `<td>${asset}</td>`
+        ].join('')
+      }
+
+      const userIds = Array.from(Array(window.localStorage.length).keys()).
+        map(i => window.localStorage.key(i)).
+        filter(k => k.startsWith('user_id:')).
+        map(id => id.replace('user_id:', ''))
+
+      const userDatalist = document.getElementById('user-datalist')
+      userDatalist.innerHTML = ''
+      for (const id of userIds) {
+        userDatalist.innerHTML += `<option value="${window.localStorage.getItem(`user_id:${id}`)} (${id})"/>`
+      }
+
+      const userTable = document.getElementById('user-table')
+      for(i = 1; i < userTable.rows.length; i++) { userTable.deleteRow(i) }
+      for (const user of category['registered_users']) {
+        const row = userTable.insertRow()
+        row.innerHTML = [
+          `<td><a href="/user.html?id=${user}">${window.localStorage.getItem(`user_id:${user}`)}</a></td>`,
+          `<td>${user}</td>`
+        ].join('')
+      }
+
+      document.getElementById('load-button').removeAttribute('disabled')
+    }
+
+    async function category_edit() {
+      document.getElementById('edit-button').setAttribute('disabled', 'true')
+
+      const categoryId = document.getElementById('category-id-input').value ? 
+        document.getElementById('category-id-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request(`/api/categories/${categoryId}/edit`, {
+        method: "put",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` },
+        body: JSON.stringify({ 
+          'name': document.getElementById('category-name-input').value,
+          'description': document.getElementById('description-input').value
+        })
+      }))
+
+      console.log((await response.json()))
+
+      await category()
+
+      document.getElementById('edit-button').removeAttribute('disabled')
+    }
+
+    async function category_delete() {
+      const categoryId = document.getElementById('category-id-input').value ? 
+        document.getElementById('category-id-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request(`/api/categories/${categoryId}/delete`, {
+        method: "delete",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      console.log((await response.json()))
+
+      window.open("/categories.html", "_self") 
+    }
+
+    async function user_add() {
+      document.getElementById('add-user-button').setAttribute('disabled', 'true')
+
+      const categoryId = document.getElementById('category-id-input').value ? 
+        document.getElementById('category-id-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const userId = document.getElementById('user-input').value.
+        match("^.*? \\(([0-9]+)\\)$")[1]
+
+      const response = await fetch(new Request(`/api/categories/${categoryId}/registered_users/${userId}/add`, {
+        method: "put",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      console.log((await response.json()))
+
+      await category()
+
+      document.getElementById('add-user-button').removeAttribute('disabled')
+    }
+
+    async function user_remove() {
+      document.getElementById('remove-user-button').setAttribute('disabled', 'true')
+
+      const categoryId = document.getElementById('category-id-input').value ? 
+        document.getElementById('category-id-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const userId = document.getElementById('user-input').value.
+        match("^.*? \\(([0-9]+)\\)$")[1]
+
+      const response = await fetch(new Request(`/api/categories/${categoryId}/registered_users/${userId}/remove`, {
+        method: "put",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      console.log((await response.json()))
+
+      await category()
+
+      document.getElementById('remove-user-button').removeAttribute('disabled')
+    }
+
+    async function asset_add() {
+      document.getElementById('add-asset-button').setAttribute('disabled', 'true')
+
+      const categoryId = document.getElementById('category-id-input').value ? 
+        document.getElementById('category-id-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const assetUuid = document.getElementById('asset-input').value.
+        match("^.*? \\(([a-f0-9\\-]+)\\)$")[1]
+
+      const response = await fetch(new Request(`/api/categories/${categoryId}/assets/${assetUuid}/add`, {
+        method: "put",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      console.log((await response.json()))
+
+      await category()
+
+      document.getElementById('add-asset-button').removeAttribute('disabled')
+    }
+
+    async function asset_remove() {
+      document.getElementById('remove-asset-button').setAttribute('disabled', 'true')
+
+      const categoryId = document.getElementById('category-id-input').value ? 
+        document.getElementById('category-id-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const assetUuid = document.getElementById('asset-input').value.
+        match("^.*? \\(([a-f0-9\\-]+)\\)$")[1]
+
+      const response = await fetch(new Request(`/api/categories/${categoryId}/assets/${assetUuid}/remove`, {
+        method: "put",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      console.log((await response.json()))
+
+      await category()
+
+      document.getElementById('remove-asset-button').removeAttribute('disabled')
+    }
+
+    const params = new URLSearchParams(document.location.search)
+
+    document.getElementById('category-id-input').value = params.get("id")
+
+    document.getElementById('load-button').addEventListener('click', (event) => {
+      window.open(`/category.html?id=${document.getElementById('category-id-input').value}`, '_self')
+    })
+    document.getElementById('back-to-categories-button').addEventListener('click', (event) => { 
+      window.open("/categories.html", "_self")
+    })
+    document.getElementById('edit-button').addEventListener('click', (event) => { category_edit() })
+    document.getElementById('add-user-button').addEventListener('click', (event) => { user_add() })
+    document.getElementById('remove-user-button').addEventListener('click', (event) => { user_remove() })
+    document.getElementById('add-asset-button').addEventListener('click', (event) => { asset_add() })
+    document.getElementById('remove-asset-button').addEventListener('click', (event) => { asset_remove() })
+
+    category()
+  </script>
+</html>

@@ -1,0 +1,375 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>Asset</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/" style="color:white">Securities Management</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+          <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+            <li class="nav-item">
+              <a class="nav-link" href="/assets.html" style="color:white">Assets</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/categories.html" style="color:white">Categories</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/users.html" style="color:white">Users</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container my-3">
+      <h3>Asset</h3>
+    </div>
+    <div class="container my-3">
+      <div class="btn-group" role="group" aria-label="Asset Actions">
+        <button type="button" class="btn btn-primary" id="back-to-assets-button">Back to Assets</button>
+      </div>
+      <form class="my-3">
+        <div class="mb-3">
+          <label for="asset-uuid-input" class="form-label">Asset Uuid</label>
+          <input type="text" class="form-control" id="asset-uuid-input" required></input>
+        </div>
+        <div class="col-12">
+          <button type="button" class="btn btn-primary" id="load-button" disabled>Load Asset</button>
+        </div>
+      </form>
+    </div>
+    <div class="container my-3">
+      <hr/>
+      <ul class="nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/asset_activities.html" id="asset-activities-a">Activities</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/asset_ownership.html" id="asset-ownerships-a">Ownerships</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/asset_balances.html" id="asset-balances-a">Balances</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled" href="/asset_lost_outputs.html" id="asset-lost-outputs-a">Lost Outputs</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/asset_treasury_addresses.html" id="asset-treasury-addresses-a">Treasury Addresses</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/asset_assignments.html" id="asset-assignments-a">Assignments</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/asset_distributions.html" id="asset-distributions-a">Distributions</a>
+        </li>
+      </ul>
+    </div>
+    <div class="container my-3">
+      <hr/>
+      <h4>Asset Details</h4>
+    </div>
+    <div class="container my-3">
+      <div class="row mb-2">
+        <div class="col">Name</div><div class="col-9" id="name-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Asset Uuid</div><div class="col-9" id="asset-uuid-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Issuer</div><div class="col-9" id="issuer-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Asset Id</div><div class="col-9" id="asset-id-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Reissuance Token Id</div><div class="col-9" id="reissuance-token-id-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Requirements</div><div class="col-9" id="requirements-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Ticker</div><div class="col-9" id="ticker-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Precision</div><div class="col-9" id="precision-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Domain</div><div class="col-9" id="domain-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Public Key</div><div class="col-9" id="pubkey-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Registered</div><div class="col-9" id="registered-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Authorized</div><div class="col-9" id="authorized-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Locked</div><div class="col-9" id="locked-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Issuer Authorization Endpoint</div><div class="col-9" id="issuer-authorization-endpoint-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Investors Restricted</div><div class="col-9" id="investors-restricted-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Transfer Restricted</div><div class="col-9" id="transfer-restricted-div"></div>
+      </div>
+    </div>
+    <div class="container my-3">
+      <hr/>
+      <h4>Asset Actions</h4>
+    </div>
+    <div class="container my-3">
+      <div class="btn-group" role="group" aria-label="Asset Actions">
+        <button type="button" class="btn btn-primary" disabled>Edit</button>
+        <button type="button" class="btn btn-primary" disabled id="delete-button">Delete</button>
+        <button type="button" class="btn btn-primary" id="register-button">Register</button>
+        <button type="button" class="btn btn-primary" id="register-authorized-button">Register Authorized</button>
+        <button type="button" class="btn btn-primary" id="lock-button">Lock</button>
+        <button type="button" class="btn btn-primary" id="unlock-button">Unlock</button>
+      </div>
+    </div>
+    <div class="container my-3">
+      <h5 class="my-2">Edit</h5>
+      Updates an existing asset. The only field that can be updated is the asset's
+      authorization endpoint.
+      <h5 class="my-2">Delete</h5>
+      Deletes the given asset and any associated relational data.
+      The deletion cannot be undone. Deletion does not affect the
+      underlying asset on the Liquid blockchain, neither does it destroy an
+      issued asset amount. Use with caution for assets accidentally issued.
+      <h5 class="my-2">Register</h5>
+      Registers the asset with the Blockstream Asset Registry if the requirements are satisifed.
+      The asset registry allows you to register an asset and prove ownership
+      against a domain name. The asset needs to have a ticker, domain and
+      pubkey. For more information see: 
+      <a href="https://docs.liquid.net/docs/blockstream-amp-api-tutorial-in-python#liquid-asset-registry">
+        Blockstream AMP Tutorial - Liquid Asset Registry
+      </a>
+      <h5 class="my-2">Register Authorized</h5>
+      Authorizes the asset within Green to be handled by Green's
+      wallet control features. Allows whitelisting etc.
+      <h5 class="my-2">Lock</h5>
+      Lock the asset. If an asset is locked, all Green authorization requests will be
+      rejected. Note that this does not affect transactions from the
+      treasury wallet.
+      <h5 class="my-2">Unlock</h5>
+      Unlock the asset. If an asset is unlocked, Green authorization requests are processed
+      and may be accepted.
+    </div>
+    <div class="container my-3">
+      <hr/>
+      <h4>Asset Summary</h4>
+    </div>
+    <div class="container my-3">
+      <div class="row mb-2">
+        <div class="col">Asset Id</div><div class="col-9" id="summary-asset-id-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Reissuance Token Id</div><div class="col-9" id="summary-reissuance-token-id-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Issued</div><div class="col-9" id="summary-issued-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Reissued</div><div class="col-9" id="summary-reissued-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Assigned</div><div class="col-9" id="summary-assigned-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Distributed</div><div class="col-9" id="summary-distributed-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Burned</div><div class="col-9" id="summary-burned-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Blacklisted</div><div class="col-9" id="summary-blacklisted-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Registered Users</div><div class="col-9" id="summary-registered-users-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Active Registered Users</div><div class="col-9" id="summary-active-registered-users-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Active Green Subaccounts</div><div class="col-9" id="summary-active-green-subaccounts-div"></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col">Reissuance Tokens</div><div class="col-9" id="summary-reissuance-tokens-div"></div>
+      </div>
+    </div>
+  </body>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function asset() {
+      const assetUuid = document.getElementById('asset-uuid-input').value ? 
+        document.getElementById('asset-uuid-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request(`/api/assets/${assetUuid}`, {
+        method: "get",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      const asset = await response.json()
+
+      document.getElementById('name-div').innerText = asset['name']
+      document.getElementById('asset-uuid-div').innerText = asset['asset_uuid']
+      document.getElementById('issuer-div').innerText = asset['issuer']
+      document.getElementById('asset-id-div').innerText = asset['asset_id']
+      document.getElementById('reissuance-token-id-div').innerText = asset['reissuance_token_id'] ? asset['reissuance_token_id'] : ''
+      document.getElementById('requirements-div').innerText = JSON.stringify(asset['requirements'])
+      document.getElementById('ticker-div').innerText = asset['ticker']
+      document.getElementById('precision-div').innerText = asset['precision']
+      document.getElementById('domain-div').innerText = asset['domain']
+      document.getElementById('pubkey-div').innerText = asset['pubkey']
+      document.getElementById('registered-div').innerText = asset['is_registered']
+      document.getElementById('authorized-div').innerText = asset['is_authorized']
+      document.getElementById('locked-div').innerText = asset['is_locked']
+      document.getElementById('issuer-authorization-endpoint-div').innerText = asset['issuer_authorization_endpoint']
+      document.getElementById('investors-restricted-div').innerText = asset['investors_restricted']
+      document.getElementById('transfer-restricted-div').innerText = asset['transfer_restricted']
+
+      document.getElementById('load-button').removeAttribute('disabled')
+    }
+
+    async function asset_register() {
+      const assetUuid = document.getElementById('asset-uuid-input').value ? 
+        document.getElementById('asset-uuid-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request(`/api/assets/${assetUuid}/register`, {
+        method: "get",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      console.log((await response.json()))
+
+      await asset()
+    }
+
+    async function asset_register_authorized() {
+      const assetUuid = document.getElementById('asset-uuid-input').value ? 
+        document.getElementById('asset-uuid-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request(`/api/assets/${assetUuid}/register-authorized`, {
+        method: "get",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      console.log((await response.json()))
+
+      await asset()
+    }
+
+    async function asset_lock() {
+      const assetUuid = document.getElementById('asset-uuid-input').value ? 
+        document.getElementById('asset-uuid-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request(`/api/assets/${assetUuid}/lock`, {
+        method: "put",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      console.log((await response.json()))
+
+      await asset()
+    }
+
+    async function asset_unlock() {
+      const assetUuid = document.getElementById('asset-uuid-input').value ? 
+        document.getElementById('asset-uuid-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request(`/api/assets/${assetUuid}/unlock`, {
+        method: "put",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      console.log((await response.json()))
+
+      await asset()
+    }
+
+    async function asset_summary() {
+      const assetUuid = document.getElementById('asset-uuid-input').value ? 
+        document.getElementById('asset-uuid-input').value : ''
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request(`/api/assets/${assetUuid}/summary`, {
+        method: "get",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      const summary = await response.json()
+
+      document.getElementById('summary-asset-id-div').innerText = summary['asset_id']
+      document.getElementById('summary-reissuance-token-id-div').innerText = summary['reissuance_token_id']
+      document.getElementById('summary-issued-div').innerText = summary['issued']
+      document.getElementById('summary-reissued-div').innerText = summary['reissued']
+      document.getElementById('summary-assigned-div').innerText = summary['assigned']
+      document.getElementById('summary-distributed-div').innerText = summary['distributed']
+      document.getElementById('summary-burned-div').innerText = summary['burned']
+      document.getElementById('summary-blacklisted-div').innerText = summary['blacklisted']
+      document.getElementById('summary-registered-users-div').innerText = summary['registered_users']
+      document.getElementById('summary-active-registered-users-div').innerText = summary['active_registered_users']
+      document.getElementById('summary-active-green-subaccounts-div').innerText = summary['active_green_subaccounts']
+      document.getElementById('summary-reissuance-tokens-div').innerText = summary['reissuance_tokens']
+    }
+
+    const params = new URLSearchParams(document.location.search)
+
+    document.getElementById('asset-uuid-input').value = params.get("uuid")
+
+    document.getElementById('load-button').addEventListener('click', (event) => {
+      window.open(`/asset.html?uuid=${document.getElementById('asset-uuid-input').value}`, '_self')
+    })
+    document.getElementById('back-to-assets-button').addEventListener('click', (event) => { 
+      window.open("/assets.html", "_self") 
+    })
+    document.getElementById('register-button').addEventListener('click', (event) => { asset_register() })
+    document.getElementById('register-authorized-button').addEventListener('click', (event) => { 
+      asset_register_authorized() 
+    })
+    document.getElementById('lock-button').addEventListener('click', (event) => { asset_lock() })
+    document.getElementById('unlock-button').addEventListener('click', (event) => { asset_unlock() })
+    
+    document.getElementById('asset-activities-a').setAttribute('href', 
+      `/asset_activities.html?uuid=${params.get("uuid")}`)
+    document.getElementById('asset-ownerships-a').setAttribute('href', 
+      `/asset_ownerships.html?uuid=${params.get("uuid")}`)
+    document.getElementById('asset-balances-a').setAttribute('href', 
+      `/asset_balances.html?uuid=${params.get("uuid")}`)
+    document.getElementById('asset-lost-outputs-a').setAttribute('href', 
+      `/asset_lost_outputs.html?uuid=${params.get("uuid")}`)
+    document.getElementById('asset-treasury-addresses-a').setAttribute('href', 
+      `/asset_treasury_addresses.html?uuid=${params.get("uuid")}`)
+    document.getElementById('asset-assignments-a').setAttribute('href', 
+      `/asset_assignments.html?uuid=${params.get("uuid")}`)
+    document.getElementById('asset-distributions-a').setAttribute('href', 
+      `/asset_distributions.html?uuid=${params.get("uuid")}`)
+
+    asset()
+
+    asset_summary()
+  </script>
+</html>
+

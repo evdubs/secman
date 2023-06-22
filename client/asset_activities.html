@@ -1,0 +1,194 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>Asset Activities</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/" style="color:white">Securities Management</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+          <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+            <li class="nav-item">
+              <a class="nav-link" href="/assets.html" style="color:white">Assets</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/categories.html" style="color:white">Categories</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/users.html" style="color:white">Users</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container my-3">
+      <h3>Asset Activities</h3>
+    </div>
+    <div class="container card w-75 text-bg-light">
+      <div class="card-body">
+        Returned activities can be of type: issuance, reissuance,
+        distribution, transactions. 
+        The start parameter is 1 (not zero) based to make paging easier for
+        clients.
+        A negative value can be provided to return from the end of the list.
+        Height_start and height_stop will filter and return only activites
+        confirmed between these block heights.
+        If there are lost outputs, we will include them in this list.
+      </div>
+    </div>
+    <div class="container my-3">
+      <div class="btn-group" role="group" aria-label="Asset Actions">
+        <button type="button" class="btn btn-primary" id="back-to-asset-button">Back to Asset</button>
+      </div>
+      <form class="my-3">
+        <div class="mb-3">
+          <label for="asset-uuid-input" class="form-label">Asset Uuid</label>
+          <input type="text" class="form-control" id="asset-uuid-input" required></input>
+        </div>
+        <div class="collapse" id="params">
+          <div class="mb-3">
+            <label for="start-input" class="form-label">Start</label>
+            <input type="number" class="form-control" id="start-input" value="1"></input>
+            <div class="form-text">
+              Start index for pagination
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="count-input" class="form-label">Count</label>
+            <input type="number" class="form-control" id="count-input" value="50"></input>
+            <div class="form-text">
+              Number of results per call
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="sort-column-input" class="form-label">Sort Column</label>
+            <input type="text" class="form-control" id="sort-column-input" value="datetime"></input>
+            <div class="form-text">
+              The sort column parameter can either be an index number
+              (starting at 1) or the string name of the column.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="sort-order-input" class="form-label">Sort Order</label>
+            <input type="text" class="form-control" id="sort-order-input" value="desc"></input>
+            <div class="form-text">
+              The sort order parameter can either be asc (for ascending)
+              or desc (for descending) and defaults to asc if the parameter is not
+              included.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="height-start-input" class="form-label">Height Start</label>
+            <input type="number" class="form-control" id="height-start-input" value="1"></input>
+            <div class="form-text">
+              Start block height for filtering.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="height-stop-input" class="form-label">Height Stop</label>
+            <input type="number" class="form-control" id="height-stop-input" value="21000000"></input>
+            <div class="form-text">
+              Stop block height for filtering.
+            </div>
+          </div>
+        </div>
+        <div class="btn-group" role="group" aria-label="Assignment Actions">
+          <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#params" aria-expanded="false" aria-controls="params">
+            Show / Hide Parameters
+          </button>
+          <button type="button" class="btn btn-primary" id="list-button">List Activities</button>
+        </div>      
+      </form>
+    </div>
+    <div class="container my-3">
+      <table class="table" id="activity-table">
+        <thead>
+          <tr>
+            <th scope="col">Type</th>
+            <th scope="col">Datetime</th>
+            <th scope="col">Description</th>
+            <th scope="col">Txid</th>
+            <th scope="col">Vout</th>
+            <th scope="col">Block Height</th>
+            <th scope="col">Asset Blinder</th>
+            <th scope="col">Amount Blinder</th>
+            <th scope="col">Registered User</th>
+            <th scope="col">Amount</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </body>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function asset_activities() {
+      const activityTable = document.getElementById('activity-table')
+      for(i = 1; i < activityTable.rows.length; i++) {
+        activityTable.deleteRow(i)
+      }
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request([
+        `/api/assets/${document.getElementById('asset-uuid-input').value}/activities`,
+        `?start=${document.getElementById('start-input').value}`,
+        `&count=${document.getElementById('count-input').value}`,
+        `&sortcolumn=${document.getElementById('sort-column-input').value}`,
+        `&sortorder=${document.getElementById('sort-order-input').value}`,
+        `&height_start=${document.getElementById('height-start-input').value}`,
+        `&height_stop=${document.getElementById('height-stop-input').value}`
+      ].join(''), {
+        method: "get",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      const activities = await response.json()
+
+      for (const activity of activities) {
+        const txid = activity['txid']
+        const asb = activity['asset_blinder']
+        const amb = activity['amount_blinder']
+
+        const row = activityTable.insertRow()
+        row.innerHTML = [
+          `<td>${activity['type']}</td>`,
+          `<td>${activity['datetime']}</td>`,
+          `<td>${activity['description']}</td>`,
+          `<td data-bs-toggle="tooltip" data-bs-title="${txid}">${txid.substring(0, 4)} ... ${txid.substring((txid.length - 4), txid.length)}</td>`,
+          `<td>${activity['vout']}</td>`,
+          `<td>${activity['blockheight']}</td>`,
+          `<td data-bs-toggle="tooltip" data-bs-title="${asb}">${asb.substring(0, 4)} ... ${asb.substring((asb.length - 4), asb.length)}</td>`,
+          `<td data-bs-toggle="tooltip" data-bs-title="${amb}">${amb.substring(0, 4)} ... ${amb.substring((amb.length - 4), amb.length)}</td>`,
+          `<td>${activity['registered_user']}</td>`,
+          `<td>${activity['amount']}</td>`
+        ].join('')
+      }
+
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+      document.getElementById('list-button').removeAttribute('disabled')
+    }
+
+    const params = new URLSearchParams(document.location.search)
+
+    document.getElementById('asset-uuid-input').value = params.get("uuid")
+
+    document.getElementById('back-to-asset-button').addEventListener('click', (event) => { 
+      window.open(`/asset.html?uuid=${params.get("uuid")}`, "_self") 
+    })
+
+    var listButton = document.getElementById('list-button')
+    listButton.addEventListener('click', (event) => {
+      listButton.setAttribute('disabled', 'true')
+
+      asset_activities()
+    })
+  </script>
+</html>

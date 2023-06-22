@@ -1,0 +1,197 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>Asset Assignments</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/" style="color:white">Securities Management</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+          <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+            <li class="nav-item">
+              <a class="nav-link" href="/assets.html" style="color:white">Assets</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/categories.html" style="color:white">Categories</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/users.html" style="color:white">Users</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container my-3">
+      <h3>Asset Assignments</h3>
+    </div>
+    <div class="container card w-75 text-bg-light">
+      <div class="card-body">
+        List of asset assignments. An assignment is an allocation of an amount
+        of the asset to an investor.
+      </div>
+    </div>
+    <div class="container my-3">
+      <div class="btn-group" role="group" aria-label="Assignment Actions">
+        <button type="button" class="btn btn-primary" id="back-to-asset-button">Back to Asset</button>
+        <button type="button" class="btn btn-primary" id="create-button">Create Assignment</button>
+      </div>
+      <form class="my-3">
+        <div class="mb-3">
+          <label for="asset-uuid-input" class="form-label">Asset Uuid</label>
+          <input type="text" class="form-control" id="asset-uuid-input" required></input>
+        </div>
+        <div class="collapse" id="params">
+          <div class="mb-3">
+            <label for="distributed-input" class="form-label">Distributed</label>
+            <input type="text" class="form-control" id="distributed-input"></input>
+            <div class="form-text">
+              Filter on distribution status. Valid values: true, false. Leave blank for both.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="vested-input" class="form-label">Vested</label>
+            <input type="text" class="form-control" id="vested-input"></input>
+            <div class="form-text">
+              Filter on vesting status. Valid values: true, false. Leave blank for both.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="vesting-timestamp-input" class="form-label">Vesting Timestamp</label>
+            <input type="datetime-local" class="form-control" id="vesting-timestamp-input"></input>
+            <div class="form-text">
+              Filter vesting after a specified timestamp.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="user-input" class="form-label">User Name (Id)</label>
+            <input list="user-datalist" class="form-control" id="user-input"></input>
+            <datalist id="user-datalist"></datalist>
+          </div>
+          <div class="mb-3">
+            <label for="creator-id-input" class="form-label">Creator Id</label>
+            <input type="number" class="form-control" id="creator-id-input"></input>
+          </div>
+        </div>
+        <div class="btn-group" role="group" aria-label="Assignment Actions">
+          <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#params" aria-expanded="false" aria-controls="params">
+            Show / Hide Parameters
+          </button>
+          <button type="button" class="btn btn-primary" id="list-button">List Assignments</button>
+        </div>      
+      </form>
+    </div>
+    <div class="container my-3">
+      <table class="table" id="assignment-table">
+        <thead>
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">User</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Receiving Address</th>
+            <th scope="col">Distribution Uuid</th>
+            <th scope="col">Ready</th>
+            <th scope="col">Vesting</th>
+            <th scope="col">Vested</th>
+            <th scope="col">Distributed</th>
+            <th scope="col">Creator</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </body>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function asset_assignments() {
+      const assignmentTable = document.getElementById('assignment-table')
+      for(i = 1; i < assignmentTable.rows.length; i++) {
+        assignmentTable.deleteRow(i)
+      }
+
+      const token = window.localStorage.getItem("token")
+
+      const params = new URLSearchParams()
+
+      const dist = document.getElementById('distributed-input').value
+      if (dist != '') { params.append('is_distributed', dist) }
+      const vested = document.getElementById('vested-input').value
+      if (vested != '') { params.append('has_vested', vested) }
+      const vestingTimestamp = document.getElementById('vesting-timestamp-input').value
+      if (vestingTimestamp != '') { params.append('vesting_timestamp_from', (new Date(vestingTimestamp)) / 1000) }
+      const userIdMatch = document.getElementById('user-input').value.match("^.*? \\(([0-9]+)\\)$")
+      if (userIdMatch != null) { params.append('registered_user', userIdMatch[1]) }
+      const creator = document.getElementById('creator-id-input').value
+      if (creator != '') { params.append('creator', creator) }
+
+      const response = await fetch(new Request([
+        `/api/assets/${document.getElementById('asset-uuid-input').value}/assignments`,
+        `?${params.toString()}`
+      ].join(''), {
+        method: "get",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      const assignments = await response.json()
+
+      for (const assignment of assignments) {
+        const rxaddr = assignment['receiving_address']
+        // default of 8 spaces for the substring code
+        const dxuuid = assignment['distribution_uuid'] ? assignment['distribution_uuid'] : '        '
+
+        const row = assignmentTable.insertRow()
+        row.innerHTML = [
+          `<td>${assignment['id']}</td>`,
+          `<td><a href="/user.html?id=${assignment['registered_user']}">${window.localStorage.getItem(`user_id:${assignment['registered_user']}`)}</a></td>`,
+          `<td>${assignment['amount']}</td>`,
+          `<td data-bs-toggle="tooltip" data-bs-title="${rxaddr}">${rxaddr.substring(0, 4)} ... ${rxaddr.substring((rxaddr.length - 4), rxaddr.length)}</td>`,
+          `<td data-bs-toggle="tooltip" data-bs-title="${dxuuid}">${dxuuid.substring(0, 4)} ... ${dxuuid.substring((dxuuid.length - 4), dxuuid.length)}</td>`,
+          `<td>${assignment['ready_for_distribution']}</td>`,
+          `<td>${assignment['vesting_datetime']}</td>`,
+          `<td>${assignment['has_vested']}</td>`,
+          `<td>${assignment['is_distributed']}</td>`,
+          `<td>${assignment['creator']}</td>`
+        ].join('')
+      }
+
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+      document.getElementById('list-button').removeAttribute('disabled')
+    }
+
+    const userIds = Array.from(Array(window.localStorage.length).keys()).
+        map(i => window.localStorage.key(i)).
+        filter(k => k.startsWith('user_id:')).
+        map(id => id.replace('user_id:', ''))
+
+    const userDatalist = document.getElementById('user-datalist')
+    userDatalist.innerHTML = ''
+    for (const id of userIds) {
+      userDatalist.innerHTML += `<option value="${window.localStorage.getItem(`user_id:${id}`)} (${id})"/>`
+    }
+
+    const params = new URLSearchParams(document.location.search)
+
+    document.getElementById('asset-uuid-input').value = params.get("uuid")
+
+    document.getElementById('back-to-asset-button').addEventListener('click', (event) => { 
+      window.open(`/asset.html?uuid=${params.get("uuid")}`, "_self") 
+    })
+
+    document.getElementById('create-button').addEventListener('click', (event) => { 
+      window.open(`/asset_assignment_create.html?uuid=${params.get("uuid")}`, "_self") 
+    })
+
+    var listButton = document.getElementById('list-button')
+    listButton.addEventListener('click', (event) => {
+      listButton.setAttribute('disabled', 'true')
+
+      asset_assignments()
+    })
+  </script>
+</html>

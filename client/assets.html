@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>Assets</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/" style="color:white">Securities Management</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+          <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+            <li class="nav-item">
+              <a class="nav-link" href="/assets.html" style="color:white">Assets</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/categories.html" style="color:white">Categories</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/users.html" style="color:white">Users</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container my-3">
+      <h3>Assets</h3>
+    </div>
+    <div class="container my-3">
+      <div class="btn-group" role="group" aria-label="Asset Actions">
+        <button type="button" class="btn btn-primary" id="issue-button">Issue New Asset</button>
+      </div>
+    </div>
+    <div class="container my-3">
+      <table class="table" id="asset-table">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Asset ID</th>
+            <th scope="col">Ticker</th>
+            <th scope="col">Precision</th>
+            <th scope="col">Domain</th>
+            <th scope="col">Registered</th>
+            <th scope="col">Authorized</th>
+            <th scope="col">Locked</th>
+            <th scope="col">Transfer Restricted</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </body>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function assets() {
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request("/api/assets/", {
+        method: "get",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      }))
+
+      const assets = await response.json()
+      const assetTable = document.getElementById('asset-table')
+
+      for (const asset of assets) {
+        window.localStorage.setItem(`asset_uuid:${asset['asset_uuid']}`, asset['name'])
+
+        const aid = asset['asset_id']
+        const row = assetTable.insertRow()
+        row.innerHTML = [
+          `<td><a href="/asset.html?uuid=${asset['asset_uuid']}">${asset['name']}</a></td>`,
+          `<td data-bs-toggle="tooltip" data-bs-title="${aid}">${aid.substring(0, 4)} ... ${aid.substring((aid.length - 4), aid.length)}</td>`,
+          `<td>${asset['ticker']}</td>`,
+          `<td>${asset['precision']}</td>`,
+          `<td>${asset['domain']}</td>`,
+          `<td>${asset['is_registered']}</td>`,
+          `<td>${asset['is_authorized']}</td>`,
+          `<td>${asset['is_locked']}</td>`,
+          `<td>${asset['transfer_restricted']}</td>`
+        ].join('')
+      }
+      
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    }
+
+    document.getElementById('issue-button').addEventListener('click', (event) => {
+      window.open("/asset_issue.html", "_self")
+    })
+
+    assets()
+  </script>
+</html>

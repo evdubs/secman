@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>Log In</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/" style="color:white">Securities Management</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+          <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+            <li class="nav-item">
+              <a class="nav-link" href="/assets.html" style="color:white">Assets</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/categories.html" style="color:white">Categories</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/users.html" style="color:white">Users</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container my-3">
+      <h3>Log In</h3>
+    </div>
+    <div class="container my-3">
+      <form id="login-form">
+        <div class="mb-3">
+          <label for="username-input" class="form-label">User name</label>
+          <input type="text" class="form-control" id="username-input"></input>
+        </div>
+        <div class="mb-3">
+          <label for="password-input" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password-input"></input>
+        </div>
+        <button type="button" class="btn btn-primary" id="login-button">Login</button>
+      </form>
+    </div>
+  </body>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function obtain_token(username, password) {
+      const response = await fetch(new Request("/api/user/obtain_token", {
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({"username": username, "password": password})
+      }))
+
+      const token = (await response.json())['token']
+      console.log(`token ${token}`)
+
+      if (token) {
+        console.log('storing token')
+        window.localStorage.setItem("token", token)
+
+        // build local caches of assets, categories, and users
+        const assetsResponse = await fetch(new Request("/api/assets/", {
+          method: "get",
+          headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+        }))
+        const assets = await assetsResponse.json()
+        for (const asset of assets) {
+          window.localStorage.setItem(`asset_uuid:${asset['asset_uuid']}`, asset['name'])
+        }
+
+        const categoriesResponse = await fetch(new Request("/api/categories", {
+          method: "get",
+          headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+        }))
+        const categories = await categoriesResponse.json()
+        for (const category of categories) {
+          window.localStorage.setItem(`category_id:${category['id']}`, category['name'])
+        }
+
+        const usersResponse = await fetch(new Request("/api/registered_users/", {
+          method: "get",
+          headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+        }))
+        const users = await usersResponse.json()
+        for (const user of users) {
+          window.localStorage.setItem(`user_id:${user['id']}`, user['name'])
+        }
+        
+        window.open("/assets.html", "_self")
+      } else {
+        const alert = document.createElement('div')
+        alert.innerHTML = [
+          `<br/>`,
+          `<div class="alert alert-primary alert-dismissible" role="alert">`,
+          `   <div>Could not retrieve token from Blockstream AMP. Check your username/password</div>`,
+          '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+          '</div>'
+        ].join('')
+        document.getElementById('login-form').append(alert)
+      }
+
+      document.getElementById('login-button').removeAttribute('disabled')
+    }
+
+    var loginButton = document.getElementById('login-button')
+    loginButton.addEventListener('click', (event) => {
+      loginButton.setAttribute('disabled', 'true')
+
+      const username = document.getElementById('username-input')
+      const password = document.getElementById('password-input')
+      
+      obtain_token(username.value, password.value)
+    })
+
+  </script>
+</html>

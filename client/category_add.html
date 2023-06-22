@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>Add Category</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/" style="color:white">Securities Management</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+          <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+            <li class="nav-item">
+              <a class="nav-link" href="/assets.html" style="color:white">Assets</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/categories.html" style="color:white">Categories</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/users.html" style="color:white">Users</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container my-3">
+      <h3>Add Category</h3>
+    </div>
+    <div class="container my-3">
+      <div class="btn-group" role="group" aria-label="Category Actions">
+        <button type="button" class="btn btn-primary" id="back-to-categories-button">Back to Categories</button>
+      </div>
+      <form class="my-3">
+        <div class="mb-3">
+          <label for="category-name-input" class="form-label">Category Name</label>
+          <input type="text" class="form-control" id="category-name-input" required></input>
+        </div>
+        <div class="mb-3">
+          <label for="description-input" class="form-label">Description</label>
+          <input type="text" class="form-control" id="description-input" required></input>
+        </div>
+        <div class="col-12">
+          <button type="button" class="btn btn-primary" id="add-button">Add new category</button>
+        </div>      
+      </form>
+    </div>
+  </body>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function category_add() {
+      const categoryName = document.getElementById('category-name-input').value ? 
+        document.getElementById('category-name-input').value : ''
+
+      const description = document.getElementById('description-input').value ? 
+        document.getElementById('description-input').value : ''
+
+      console.debug(`
+        categoryName: ${categoryName}
+        description: ${description}
+      `)
+
+      const token = window.localStorage.getItem("token")
+
+      const response = await fetch(new Request("/api/categories/add", {
+        method: "post",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` },
+        body: JSON.stringify({
+          'name': categoryName,
+          'description': description
+        })
+      }))
+
+      console.info((await response.json()))
+
+      document.getElementById('add-button').removeAttribute('disabled')
+    }
+
+    var addButton = document.getElementById('add-button')
+    addButton.addEventListener('click', (event) => {
+      addButton.setAttribute('disabled', 'true')
+
+      category_add()
+    })
+
+    document.getElementById('back-to-categories-button').addEventListener('click', (event) => {
+      window.open("/categories.html", "_self")
+    })
+  </script>
+</html>

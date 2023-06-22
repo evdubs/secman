@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>Asset Ownerships</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/" style="color:white">Securities Management</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+          <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+            <li class="nav-item">
+              <a class="nav-link" href="/assets.html" style="color:white">Assets</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/categories.html" style="color:white">Categories</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/users.html" style="color:white">Users</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container my-3">
+      <h3>Asset Ownerships</h3>
+    </div>
+    <div class="container card w-75 text-bg-light">
+      <div class="card-body">
+        Returns ownership distribution. Ownership point in time
+        is based upon the confirmation height of the associated transaction. 
+        Warning: if some lost outputs are present the values may be incorrect.
+      </div>
+    </div>
+    <div class="container my-3">
+      <div class="btn-group" role="group" aria-label="Asset Actions">
+        <button type="button" class="btn btn-primary" id="back-to-asset-button">Back to Asset</button>
+      </div>
+      <form class="my-3">
+        <div class="mb-3">
+          <label for="asset-uuid-input" class="form-label">Asset Uuid</label>
+          <input type="text" class="form-control" id="asset-uuid-input" required></input>
+        </div>
+        <div class="mb-3">
+          <label for="height-input" class="form-label">Height</label>
+          <input type="number" class="form-control" id="height-input"></input>
+          <div class="form-text">
+            If provided the height parameter must be a valid Liquid
+            block height else height will be set to the last Liquid block.
+            Example: height=100.
+          </div>
+        </div>
+        <div class="col-12">
+          <button type="button" class="btn btn-primary" id="list-button">List Ownerships</button>
+        </div>      
+      </form>
+    </div>
+    <div class="container my-3">
+      <table class="table" id="ownership-table">
+        <thead>
+          <tr>
+            <th scope="col">Owner</th>
+            <th scope="col">Amount</th>
+            <th scope="col">GAID</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </body>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function asset_ownerships() {
+      const ownershipTable = document.getElementById('ownership-table')
+      for(i = 1; i < ownershipTable.rows.length; i++) {
+        ownershipTable.deleteRow(i)
+      }
+
+      const uuid = document.getElementById('asset-uuid-input').value
+      const token = window.localStorage.getItem("token")
+      const height = document.getElementById('height-input').value
+      const heightParam = (height && height != '') ? `?height=${height}` : ''
+
+      const response = await fetch(new Request([
+      `/api/assets/${uuid}/ownerships`,
+      `${heightParam}`
+      ].join('')), {
+        method: "get",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` }
+      })
+
+      const ownerships = await response.json()
+
+      for (const ownership of ownerships) {
+        // default of 8 blank spaces for the substring code
+        const gaid = ownership['GAID'] ? ownership['GAID'] : '        '
+
+        const row = ownershipTable.insertRow()
+        row.innerHTML = [
+          `<td>${ownership['owner']}</td>`,
+          `<td>${ownership['amount']}</td>`,
+          `<td data-bs-toggle="tooltip" data-bs-title="${gaid}">${gaid.substring(0, 4)} ... ${gaid.substring((gaid.length - 4), gaid.length)}</td>`,
+        ].join('')
+      }
+
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+      document.getElementById('list-button').removeAttribute('disabled')
+    }
+
+    const params = new URLSearchParams(document.location.search)
+
+    document.getElementById('asset-uuid-input').value = params.get("uuid")
+
+    document.getElementById('back-to-asset-button').addEventListener('click', (event) => { 
+      window.open(`/asset.html?uuid=${params.get("uuid")}`, "_self") 
+    })
+
+    var listButton = document.getElementById('list-button')
+    listButton.addEventListener('click', (event) => {
+      listButton.setAttribute('disabled', 'true')
+
+      asset_ownerships()
+    })
+  </script>
+</html>

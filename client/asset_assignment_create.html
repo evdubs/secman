@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>Create Assignment</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="/" style="color:white">Securities Management</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarScroll">
+          <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+            <li class="nav-item">
+              <a class="nav-link" href="/assets.html" style="color:white">Assets</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/categories.html" style="color:white">Categories</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/users.html" style="color:white">Users</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container my-3">
+      <h3>Create Assignment</h3>
+    </div>
+    <div class="container card w-75 text-bg-light">
+      <div class="card-body">
+        Creates an asset assignment. An assignment is an allocation of an amount
+        of the asset to an investor. It is possible to set the value 
+        'ready_for_distribution' to true (false), so that the assignment will (not) 
+        be included in future distributions. It is possible to specify a 
+        'vesting_timestamp', so that the assignment will be included only in 
+        distributions created after the corresponding date.
+      </div>
+    </div>
+    <div class="container my-3">
+      <div class="btn-group" role="group" aria-label="Asset Actions">
+        <button type="button" class="btn btn-primary" id="back-to-assignments-button">Back to Assignments</button>
+      </div>
+      <form class="my-3">
+        <div class="mb-3">
+          <label for="asset-uuid-input" class="form-label">Asset Uuid</label>
+          <input type="text" class="form-control" id="asset-uuid-input" required></input>
+        </div>
+        <div class="mb-3">
+          <label for="user-input" class="form-label">User Name (Id)</label>
+          <input list="user-datalist" class="form-control" id="user-input"></input>
+          <datalist id="user-datalist"></datalist>
+        </div>
+        <div class="mb-3">
+          <label for="amount-input" class="form-label">Amount</label>
+          <input type="number" class="form-control" id="amount-input" required></input>
+        </div>
+        <div class="form-check mb-3">
+          <label for="distribution-input" class="form-check-label">Ready for Distribution</label>
+          <input type="checkbox" class="form-check-input" id="distribution-input" value=""></input>
+        </div>
+        <div class="mb-3">
+          <label for="vesting-input" class="form-label">Vesting Timestamp</label>
+          <input type="datetime-local" class="form-control" id="vesting-input"></input>
+          <div class="form-text">
+            Vesting timestamp must be a future timestamp, may be null. 
+            Assignment will not be distributed before the corresponding date.
+          </div>
+        </div>
+        <div class="col-12">
+          <button type="button" class="btn btn-primary" id="create-button">Create Assignment</button>
+        </div>
+      </form>
+    </div>
+  </body>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function assignment_create() {
+      const token = window.localStorage.getItem("token")
+
+      var body = {
+        'registered_user': new Number(document.getElementById('user-input').value.match("^.*? \\(([0-9]+)\\)$")[1]),
+        'amount': new Number(document.getElementById('amount-input').value),
+        'ready_for_distribution': document.getElementById('distribution-input').checked
+      }
+      const vesting = document.getElementById('vesting-input').value
+      if (vesting != '') { body['vesting_timestamp'] = (new Date(vesting)) / 1000 }
+
+      const response = await fetch(new Request([
+        `/api/assets/${document.getElementById('asset-uuid-input').value}/assignments/create`
+      ].join(''), {
+        method: "post",
+        headers: { "Content-Type": "application/json", "Authorization": `token ${token}` },
+        body: JSON.stringify({'assignments': [body]})
+      }))
+
+      console.info((await response.json()))
+
+      document.getElementById('create-button').removeAttribute('disabled')
+    }
+
+    const userIds = Array.from(Array(window.localStorage.length).keys()).
+        map(i => window.localStorage.key(i)).
+        filter(k => k.startsWith('user_id:')).
+        map(id => id.replace('user_id:', ''))
+
+    const userDatalist = document.getElementById('user-datalist')
+    userDatalist.innerHTML = ''
+    for (const id of userIds) {
+      userDatalist.innerHTML += `<option value="${window.localStorage.getItem(`user_id:${id}`)} (${id})"/>`
+    }
+
+    const params = new URLSearchParams(document.location.search)
+
+    document.getElementById('asset-uuid-input').value = params.get("uuid")
+
+    document.getElementById('back-to-assignments-button').addEventListener('click', (event) => { 
+      window.open(`/asset_assignments.html?uuid=${params.get("uuid")}`, "_self") 
+    })
+
+    const createButton = document.getElementById('create-button')
+    createButton.addEventListener('click', (event) => {
+      createButton.setAttribute('disabled', 'true')
+
+      assignment_create()
+    })
+  </script>
+</html>
