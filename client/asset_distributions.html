@@ -95,14 +95,26 @@
 
       for (const distribution of distributions) {
         // default of 8 blank spaces for the substring code
-        const gaid = distribution['GAID'] ? distribution['GAID'] : '        '
+        const uuid = distribution['distribution_uuid'] ? distribution['distribution_uuid'] : '        '
 
-        const row = distributionTable.insertRow()
-        row.innerHTML = [
-          `<td>${distribution['owner']}</td>`,
-          `<td>${distribution['amount']}</td>`,
-          `<td data-bs-toggle="tooltip" data-bs-title="${gaid}">${gaid.substring(0, 4)} ... ${gaid.substring((gaid.length - 4), gaid.length)}</td>`,
-        ].join('')
+        for (const transaction of distribution['transactions']) {
+          const txid = transaction['txid'] ? transaction['txid'] : '        '
+
+          for (const assignment of transaction['assignments']) {
+            const row = distributionTable.insertRow()
+            row.innerHTML = [
+              `<td data-bs-toggle="tooltip" data-bs-title="${uuid}">${uuid.substring(0, 4)} ... ${uuid.substring((uuid.length - 4), uuid.length)}</td>`,
+              `<td>${distribution['distribution_status']}</td>`,
+              `<td>${window.localStorage.getItem(`user_id:${assignment['registered_user']}`)} (${assignment['registered_user']})</td>`,
+              `<td data-bs-toggle="tooltip" data-bs-title="${txid}">${txid.substring(0, 4)} ... ${txid.substring((txid.length - 4), txid.length)}</td>`,
+              `<td>${transaction['transaction_status']}</td>`,
+              `<td>${transaction['included_blockheight']}</td>`,
+              `<td>${transaction['confirmed_datetime'].replace(/\.[0-9]+Z/, 'Z')}</td>`,
+              `<td>${assignment['amount']}</td>`,
+              `<td>${assignment['vout']}</td>`
+            ].join('')
+          }
+        }
       }
 
       const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
