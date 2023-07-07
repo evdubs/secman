@@ -202,6 +202,11 @@
         assignmentTable.deleteRow(i)
       }
 
+      const distributionTable = document.getElementById('distribution-table')
+      for(i = 1; i < distributionTable.rows.length; i++) {
+        distributionTable.deleteRow(i)
+      }
+
       const userId = document.getElementById('user-id-input').value ? 
         document.getElementById('user-id-input').value : ''
 
@@ -240,6 +245,29 @@
             `<td>${assignment['is_distributed']}</td>`,
             `<td>${assignment['creator']}</td>`
           ].join('')
+        }
+
+        for (const distribution of summary['distributions']) {
+          const uuid = distribution['distribution_uuid']
+
+          for (const transaction of distribution['transactions']) {
+            const txid = transaction['txid']
+
+            for (const assignment of transaction['assignments']) {
+              const row = distributionTable.insertRow()
+              row.innerHTML = [
+                `<td data-bs-toggle="tooltip" data-bs-title="${uuid}">${uuid.substring(0, 4)} ... ${uuid.substring((uuid.length - 4), uuid.length)}</td>`,
+                `<td>${distribution['distribution_status']}</td>`,
+                `<td>${window.localStorage.getItem(`user_id:${assignment['registered_user']}`)} (${assignment['registered_user']})</td>`,
+                `<td data-bs-toggle="tooltip" data-bs-title="${txid}">${txid.substring(0, 4)} ... ${txid.substring((txid.length - 4), txid.length)}</td>`,
+                `<td>${transaction['transaction_status']}</td>`,
+                `<td>${transaction['included_blockheight']}</td>`,
+                `<td>${transaction['confirmed_datetime'].replace(/\.[0-9]+Z/, 'Z')}</td>`,
+                `<td>${assignment['amount']}</td>`,
+                `<td>${assignment['vout']}</td>`
+              ].join('')
+            }
+          }
         }
       }
 
