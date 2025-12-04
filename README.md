@@ -1,6 +1,6 @@
-# bfxs-secman
+# secman
 
-Bitfinex Securities Management Application
+Securities Management Application
 
 ## Starting the server
 
